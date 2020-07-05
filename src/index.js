@@ -13,31 +13,49 @@ export const lexerType = {
     codeBegin: Symbol('{{'),
     codeEnd: Symbol('}}'),
 }
-x
 
 
 
 
+
+const str = `
+<template>
+    <ol>
+        <!--loop<value,index>(list)-->
+        <li>
+            <!--if(value.type === 'text')-->
+            <span>{{text}}</span>
+            <!--else(value.type === 'input')-->
+            <input type="text"/>
+            <!--else-->
+            <b>Error Value</b>
+            <!--end-->
+        </li>
+        <!--over-->
+    </ol>
+</template>
+`
 
 const lexer = (str) => {
 
 
     const lexerKeyWord = [
-        [lexerType.loop, /<\!--loop<value,index>\(/],
-        [lexerType.if, /<\!--if\(/],
-        [lexerType.elseIf, /<\!--else\(/],
-        [lexerType.over, /<\!--over-->/],
-        [lexerType.end, /<\!--end-->/],
-        [lexerType.else, /<\!--else-->/],
-        [lexerType.codeBegin, /\{\{/],
-        [lexerType.codeEnd, /\}\}/],
+        [lexerType.loop, /<(\!--loop(?:<\w+(,\w+)?>)?\()/],
+        [lexerType.if, /<(\!--if\()/],
+        [lexerType.elseIf, /(<\!--else\()/],
+        [lexerType.over, /(<\!--over-->)/],
+        [lexerType.end, /(<\!--end-->)/],
+        [lexerType.else, /(<\!--else-->)/],
+        [lexerType.codeBegin, /(\{\{)/],
+        [lexerType.codeEnd, /(\}\})/],
     ]
 
-    str.split('\n').map((line, index) => {
-        lexerKeyWord.reduce((r, [key, re]) => {
-            r.flatMap(str => {
+    return str.split('\n').map((line, index) => {
+        lexerKeyWord.reduce((r, [key, re], index) => {
+            console.log(index, r)
+            return r.flatMap(str => {
                 if (typeof str !== 'string') return [str]
-                return str.split(re).map(v => re.test(v) ? {
+                else return str.split(re).map(v => re.test(v) ? {
                     key,
                     index,
                     content: v
@@ -46,3 +64,5 @@ const lexer = (str) => {
         }, [line])
     })
 }
+
+lexer(str)
