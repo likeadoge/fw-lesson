@@ -1,7 +1,3 @@
-export default function fw() {
-    console.log(fw)
-}
-
 
 export const lexerType = {
     loop: Symbol('loop'),
@@ -11,24 +7,8 @@ export const lexerType = {
     end: Symbol('end'),
     code: Symbol('{{}}'),
 }
-const str = `<template>
-    <ol>
-        <!--loop<value,index>(list)-->
-        <li>
-            <!--if(value.type === 'text')-->
-            <span>{{text}}</span>
-            <!--else(value.type === 'input')-->
-            <input type="text"/>
-            <!--else-->
-            <b>Error Value</b>
-            <!--end-->
-        </li>
-        <!--over-->
-    </ol>
-</template>`
 
-
-const lexer = (str) => {
+export const lexer = (str) => {
 
 
     const lexerKeyWord = [
@@ -41,7 +21,6 @@ const lexer = (str) => {
     ]
 
     return lexerKeyWord.reduce((r, [key, re], index) => {
-        console.log(r)
         return r.flatMap(str => {
             if (typeof str !== 'string') return [str]
             else return str.split(re).map(v => re.test(v) ? {
@@ -53,5 +32,3 @@ const lexer = (str) => {
     }, [str])
 
 }
-
-console.log(lexer(str))
