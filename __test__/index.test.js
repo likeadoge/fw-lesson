@@ -1,6 +1,13 @@
 import { lexer, lexerType } from '../src/lexer'
 
-const str = `<template>
+
+
+
+describe('lexer', () => {
+    it('lexer', () => {
+        const str = `
+<template>
+    <!--loop(times)-->
     <ol>
         <!--loop<value,index>(list)-->
         <li>
@@ -14,9 +21,8 @@ const str = `<template>
         </li>
         <!--over-->
     </ol>
+    <!--over-->
 </template>`
-
-test('lexer', () => {
-    console.log(lexer(str))
-    expect(lexer(str)).toBeInstanceOf(Array);
-});
+        expect(lexer(str)).toBeInstanceOf(Array);
+    })
+})

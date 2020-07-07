@@ -1,6 +1,5 @@
 module.exports = {
-    testMatch: ['<rootDir>/__test__/\*\*/\*.js'],
     testEnvironment: 'jsdom',
-    rootDir: '',
-    moduleFileExtensions: ['js','json','jsx','node']
+    testRegex: '(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$',
+    moduleFileExtensions: ['js', 'jsx', 'json', 'node'],
 }

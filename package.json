@@ -1,20 +1,20 @@
 {
-  "name": "fw-lesson",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "jest"
-  },
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "rollup": "^2.18.2"
-  },
-  "devDependencies": {
-    "@babel/core": "^7.10.4",
-    "@babel/preset-env": "^7.10.4",
-    "babel-jest": "^26.1.0",
-    "jest": "^26.1.0"
-  }
+    "name": "fw-lesson",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "test": "jest --coverage"
+    },
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "rollup": "^2.18.2"
+    },
+    "devDependencies": {
+        "@babel/core": "^7.10.4",
+        "@babel/preset-env": "^7.10.4",
+        "babel-jest": "^26.1.0",
+        "jest": "^26.1.0"
+    }
 }
