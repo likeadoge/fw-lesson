@@ -1,3 +1,4 @@
+const tokens = fw.lexer(`
 <template>
     <!--loop(times)-->
     <ol>
@@ -14,19 +15,14 @@
         <!--over-->
     </ol>
     <!--over-->
-</template>
-
-<!--
-        
-        
-        expr
-
-        ifcase => <if> expr <else> expr <end>
-        
-
-        loopcase => <loop> expr <over>
+</template>`)
 
 
+console.log(
+    tokens
+)
 
 
-    -->
+console.log(
+    fw.parser(tokens)
+)

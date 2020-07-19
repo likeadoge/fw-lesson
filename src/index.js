@@ -1,1 +1,2 @@
-export * as lexer from './lexer'
+export { lexer } from './lexer'
+export { parser } from './parser'

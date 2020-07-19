@@ -4,7 +4,9 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "test": "jest --coverage"
+        "test": "jest --coverage",
+        "server": "roty-server",
+        "build": "rollup -c"
     },
     "author": "",
     "license": "ISC",
@@ -15,6 +17,7 @@
         "@babel/core": "^7.10.4",
         "@babel/preset-env": "^7.10.4",
         "babel-jest": "^26.1.0",
-        "jest": "^26.1.0"
+        "jest": "^26.1.0",
+        "roty": "^1.0.15"
     }
 }

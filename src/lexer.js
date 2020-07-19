@@ -1,3 +1,4 @@
+
 export const lexerType = {
     loop: Symbol('loop'),
     over: Symbol('over'),
@@ -9,7 +10,6 @@ export const lexerType = {
 }
 
 export const lexer = (str) => {
-
 
     const lexerKeyWord = [
         [lexerType.loop, /(<\!--loop(?:<\w+(?:,\w+)?>)?\([\w|\W]+?\)-->)/, (str) => {
@@ -52,9 +52,5 @@ export const lexer = (str) => {
             data: null
         } : v
     })
-
-    console.log(list)
-
     return list
-
 }
