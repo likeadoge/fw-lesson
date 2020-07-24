@@ -13,16 +13,16 @@
  *  if_tail   => <else> expr if_tail
  */
 
-import { lexerType } from './lexer'
+import { lexType } from './lexer'
 
-const parseType = {
+ const parseType = {
     progarm: Symbol('program'),
     exprList: Symbol('expr list'),
     expr: Symbol('expr'),
     ifTail: Symbol('if tail')
 }
 
-class Parser {
+ class Parser {
     static $$ = undefined
     tokens = []
 
@@ -30,7 +30,7 @@ class Parser {
         this.tokens = list
     }
 
-    token() { return this.tokens[0] }
+    token() { return this.tokens[0]?.type }
 
     is(...args) {
         return !(args.findIndex(v => v === this.token()) < 0)
@@ -45,20 +45,18 @@ class Parser {
     error() {
         throw new Error('parse error!')
     }
-
-
     program() {
         const target = {
-            key: parseType.progarm,
+            type: parseType.progarm,
             children: []
         }
         if (this.is(
-            lexerType.text,
-            lexerType.code,
-            lexerType.loop,
-            lexerType.if
+            lexType.text,
+            lexType.code,
+            lexType.loop,
+            lexType.if
         )) {
-            target.children =[
+            target.children = [
                 this.exprList(),
                 this.match(Parser.$$)
             ]
@@ -69,26 +67,26 @@ class Parser {
         return target
     }
     exprList() {
-        
+
         const target = {
-            key: parseType.exprList,
+            type: parseType.exprList,
             children: []
         }
 
         if (this.is(
-            lexerType.text,
-            lexerType.code,
-            lexerType.loop,
-            lexerType.if
+            lexType.text,
+            lexType.code,
+            lexType.loop,
+            lexType.if
         )) {
             target.children = [
                 this.expr(),
                 this.exprList()
             ]
         } else if (this.is(
-            lexerType.over,
-            lexerType.else,
-            lexerType.end,
+            lexType.over,
+            lexType.else,
+            lexType.end,
             Parser.$$
         )) {
 
@@ -99,81 +97,84 @@ class Parser {
         return target
     }
     expr() {
-        
+
         const target = {
-            key: parseType.expr,
+            type: parseType.expr,
             children: []
         }
 
         if (this.is(
-            lexerType.text
+            lexType.text
         )) {
-            
-            target.children =[
-                this.match(lexerType.text)
+
+            target.children = [
+                this.match(lexType.text)
             ]
         } else if (this.is(
-            lexerType.code
+            lexType.code
         )) {
-            
-            target.children =[
-                this.match(lexerType.code)
+
+            target.children = [
+                this.match(lexType.code)
             ]
         } else if (this.is(
-            lexerType.loop
+            lexType.loop
         )) {
-            
-            target.children =[
-                this.match(lexerType.loop),
+
+            target.children = [
+                this.match(lexType.loop),
                 this.exprList(),
-                this.match(lexerType.over),
+                this.match(lexType.over),
             ]
         } else if (this.is(
-            lexerType.if
+            lexType.if
         )) {
-            
-            target.children =[
-                this.match(lexerType.if),
+
+            target.children = [
+                this.match(lexType.if),
                 this.exprList(),
                 this.ifTail(),
             ]
         } else {
             this.error()
         }
-        
+
         return target
     }
     ifTail() {
-        
+
         const target = {
-            key: parseType.ifTail,
+            type: parseType.ifTail,
             children: []
         }
         if (this.is(
-            lexerType.end
+            lexType.end
         )) {
-            target.children =[
-                this.match(lexerType.end)
+            target.children = [
+                this.match(lexType.end)
             ]
         } else if (this.is(
-            lexerType.else
+            lexType.else
         )) {
-            
-            target.children =[
-                this.match(lexerType.else),
+
+            target.children = [
+                this.match(lexType.else),
                 this.exprList(),
                 this.ifTail(),
             ]
         } else {
             this.error()
         }
-        
+
         return target
     }
 }
 
 export const parser = (list) => {
-   return  new Parser(list.map(v => v.key)).program()
+    return new Parser(list).program()
 }
 
+export {
+    parseType
+}
 

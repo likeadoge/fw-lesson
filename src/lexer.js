@@ -1,5 +1,5 @@
 
-export const lexerType = {
+export const lexType = {
     loop: Symbol('loop'),
     over: Symbol('over'),
     if: Symbol('if'),
@@ -12,7 +12,7 @@ export const lexerType = {
 export const lexer = (str) => {
 
     const lexerKeyWord = [
-        [lexerType.loop, /(<\!--loop(?:<\w+(?:,\w+)?>)?\([\w|\W]+?\)-->)/, (str) => {
+        [lexType.loop, /(<\!--loop(?:<\w+(?:,\w+)?>)?\([\w|\W]+?\)-->)/, (str) => {
             const input = str.match(/<\!--loop(?:<(\w+(?:,\w+))?>)?\([\w|\W]+?\)-->/)[1]
             const code = str.match(/<\!--loop(?:<\w+(?:,\w+)?>)?\(([\w|\W]+?)\)-->/)[1]
             return {
@@ -20,34 +20,34 @@ export const lexer = (str) => {
                 code
             }
         }],
-        [lexerType.if, /(<\!--if\([\w|\W]+?\)-->)/, (str) => {
+        [lexType.if, /(<\!--if\([\w|\W]+?\)-->)/, (str) => {
             const code = str.match(/<\!--if\(([\w|\W]+?)\)-->/)[1]
             return { code }
         }],
-        [lexerType.else, /(<\!--else(?:\([\w|\W]+?\))?-->)/, (str) => {
+        [lexType.else, /(<\!--else(?:\([\w|\W]+?\))?-->)/, (str) => {
             const code = str.match(/(<\!--else(?:\(([\w|\W]+?)\))?-->)/)[1]
             return { code }
         }],
-        [lexerType.over, /(<\!--over-->)/],
-        [lexerType.end, /(<\!--end-->)/],
-        [lexerType.code, /(\{\{[\w|\W]+?\}\})/, (str) => {
+        [lexType.over, /(<\!--over-->)/],
+        [lexType.end, /(<\!--end-->)/],
+        [lexType.code, /(\{\{[\w|\W]+?\}\})/, (str) => {
             const code = str.match(/\{\{([\w|\W]+?)\}\}/)[1]
             return { code }
         }],
     ]
 
-    const list = lexerKeyWord.reduce((r, [key, re, fn]) => {
+    const list = lexerKeyWord.reduce((r, [type, re, fn]) => {
         return r.flatMap(str => {
             if (typeof str !== 'string') return [str]
             else return str.split(re).map(v => re.test(v) ? {
-                key,
+                type,
                 content: v,
                 data: fn ? (fn(v)) : null
             } : v)
         })
     }, [str]).map(v => {
         return typeof v === 'string' ? {
-            key: lexerType.text,
+            type: lexType.text,
             content: v,
             data: null
         } : v
