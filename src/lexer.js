@@ -25,7 +25,7 @@ export const lexer = (str) => {
             return { code }
         }],
         [lexType.else, /(<\!--else(?:\([\w|\W]+?\))?-->)/, (str) => {
-            const code = str.match(/(<\!--else(?:\(([\w|\W]+?)\))?-->)/)[1]
+            const code = str.match(/<\!--else(?:\(([\w|\W]+?)\))?-->/)[1] || 'true'
             return { code }
         }],
         [lexType.over, /(<\!--over-->)/],

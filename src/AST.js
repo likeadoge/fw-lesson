@@ -1,26 +1,26 @@
 import { lexer, lexType } from './lexer'
 import { parser, parseType } from './parser'
+import { Scope } from './Scope'
 
 export class AST {
 
-    static dealExpr = (node) => {
+    static dealExpr = (node, parent) => {
         const { children } = node
         if (children[0].type === lexType.text) {
-            return new Text(node)
+            return new Text(node, parent)
         }
         if (children[0].type === lexType.code) {
-            return new Code(node)
+            return new Code(node, parent)
         }
         if (children[0].type === lexType.if) {
-            return new IfElse(node)
+            return new IfElse(node, parent)
         }
         if (children[0].type === lexType.loop) {
-            return new Loop(node)
+            return new Loop(node, parent)
         }
     }
 
-
-    static gen(str) {
+    static gen(str, model) {
         const walk = array => array.flatMap(v => {
             if (v === undefined) {
                 return []
@@ -40,90 +40,116 @@ export class AST {
         const pre = (tree) => Object.assign({}, tree, {
             children: walk(tree.children)
         })
+        console.log(lexer(str))
 
-        return new Program(pre(parser(lexer(str))))
+        return new Program(
+            pre(parser(lexer(str))),
+            new Scope(Object.keys(model))
+        )
+    }
+
+    scope
+    constructor(scope) {
+        this.scope = scope
+    }
+
+    toHtml(model) {
+        return ''
     }
 }
-
-
-
-class Scope {
-    keys = []
-    static extends(parent, current) {
-        return new Scope(Array.from(new Set(parent.keys.concat(current))))
-    }
-    constructor(keys) {
-        this.keys = keys.filter(v => [
-            'abstract', 'arguments', 'boolean', 'break', 'byte',
-            'case', 'catch', 'char', 'class', 'const',
-            'continue', 'debugger', 'default', 'delete', 'do',
-            'double', 'else', 'enum', 'eval', 'export',
-            'extends', 'false', 'final', 'finally', 'float',
-            'for', 'function', 'goto', 'if', 'implements',
-            'import', 'in', 'instanceof', 'int', 'interface',
-            'let', 'long', 'native', 'new', 'null',
-            'package', 'private', 'protected', 'public', 'return',
-            'short', 'static', 'super', 'switch', 'synchronized',
-            'this', 'throw', 'throws', 'transient', 'true',
-            'try', 'typeof', 'var', 'void', 'volatile',
-            'while', 'with', 'yield'
-        ].find(s => s === v))
-    }
-}
-
 
 class Program extends AST {
     children = []
-    constructor({ children }) {
-        super()
-        this.children = children.map(v => AST.dealExpr(v))
+    constructor({ children }, parent) {
+        super(parent.extends())
+        this.children = children.map(v => AST.dealExpr(v, this.scope))
+    }
+    toHtml(model) {
+        return this.children.map(v => v.toHtml(model)).join('')
     }
 }
 
 class IfElse extends AST {
     else = null
     body = []
-    code = ''
-    constructor({ children }) {
-        super()
-        const [head,...body] = children
+    func
+    code = ""
+    constructor({ children }, parent) {
+        super(parent.extends())
+        const [head, ...body] = children
         const tail = body.pop()
 
-        this.code = head.data.code || 'true'
-        this.body = body.map(v => AST.dealExpr(v))
+        this.func = this.scope.genFunc(head.data.code || 'true')
+        this.body = body.map(v => AST.dealExpr(v, this.scope))
+        this.code = head.data.code
 
-        if(tail.children[0].type === lexType.else){
-            this.else = new IfElse(tail)
+        if (tail.children[0].type === lexType.else) {
+            this.else = new IfElse(tail, this.scope)
         }
-
     }
-
+    toHtml(model) {
+        if (this.func.call(model)) {
+            return this.body.map(v => v.toHtml(model)).join('')
+        } else if (this.else) {
+            return this.else.toHtml(model)
+        } else {
+            return ''
+        }
+    }
 }
 
 class Loop extends AST {
     body = []
-    constructor({ children }) {
-        super()
-        const body = children.filter((v, i, arr) => i !== 0 && i !== arr.length - 1)
+    func
+    code = ''
+    indexFiled = null
+    valueFiled = null
+    constructor({ children }, parent) {
+        const { code, input = [] } = children[0].data
+        super(parent.extends(input.filter(v => !!v)))
 
-        this.body = body.map(v => AST.dealExpr(v))
+        this.func = this.scope.genFunc(code)
+        this.code = code
+        this.valueFiled = input[0] || null
+        this.indexFiled = input[1] || null
+        this.body = children.filter((v, i, arr) => i !== 0 && i !== arr.length - 1).map(v => AST.dealExpr(v, this.scope))
+    }
+
+    toHtml(model) {
+        const arr = this.func.call(model)
+        if (!(arr instanceof Array)) throw new Error('loop error')
+        return arr.flatMap((value, index) => this.body.map(v => v.toHtml(Object.assign(
+            {},
+            model,
+            this.indexFiled ? { [this.indexFiled]: index } : {},
+            this.valueFiled ? { [this.valueFiled]: value } : {},
+        )))).join('')
     }
 
 }
 
 class Text extends AST {
     content = ''
-    constructor({ children }) {
-        super()
+    constructor({ children }, parent) {
+        super(parent.extends())
         this.content = children[0].content
+    }
+    toHtml() {
+        return this.content
     }
 
 }
 
 class Code extends AST {
+    func
     code = ''
-    constructor({ children }) {
-        super()
+    constructor({ children }, parent) {
+        super(parent.extends())
         this.code = children[0].data.code
+        this.func = this.scope.genFunc(children[0].data.code)
+    }
+
+    toHtml(model) {
+        return String(this.func.call(model))
     }
 }

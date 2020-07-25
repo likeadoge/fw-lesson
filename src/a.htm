@@ -4,9 +4,9 @@
         <!--loop<value,index>(list)-->
         <li>
             <!--if(value.type === 'text')-->
-            <span>{{text}}</span>
+            <span>{{value.text}}</span>
             <!--else(value.type === 'input')-->
-            <input type="text"/>
+            <input type="text" value="{{value.value}}"/>
             <!--else-->
             <b>Error Value</b>
             <!--end-->

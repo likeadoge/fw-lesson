@@ -1,20 +1,42 @@
-console.log(
+document.body.innerHTML =
     fw.AST.gen(`
-    <template>
-        <!--loop(times)-->
+    <div>
+        <!--loop(new Array(times).fill(null))-->
         <ol>
             <!--loop<value,index>(list)-->
             <li>
                 <!--if(value.type === 'text')-->
-                <span>{{text}}</span>
+                <span>{{value.text}}</span>
                 <!--else(value.type === 'input')-->
-                <input type="text"/>
+                <input type="text" value="{{value.value}}"/>
                 <!--else-->
-                <b>Error Value</b>
+                <b style="color:red">Error Value</b>
                 <!--end-->
             </li>
             <!--over-->
         </ol>
         <!--over-->
-    </template>`)
-)
+    </div>`, {
+        times: 3,
+        list: [{
+            type: 'text',
+            text: 'test'
+        }, {
+            type: 'input',
+            value: 'test'
+        }, {
+
+        }]
+    }).toHtml({
+        times: 3,
+        list: [{
+            type: 'text',
+            text: 'test'
+        }, {
+            type: 'input',
+            value: 'test'
+        }, {
+
+        }]
+    })
+
