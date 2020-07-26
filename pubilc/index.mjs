@@ -1,5 +1,7 @@
+import { AST } from './fw-doge/index.mjs'
+
 document.body.innerHTML =
-    fw.AST.gen(`
+    AST.gen(`
     <div>
         <!--loop(new Array(times).fill(null))-->
         <ol>

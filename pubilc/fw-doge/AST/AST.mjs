@@ -1,21 +1,21 @@
-import { lexer, lexType } from './lexer'
-import { parser, parseType } from './parser'
-import { Scope } from './Scope'
+import { Word } from './Word.mjs'
+import { WordGroup } from './WordGroup.mjs'
+import { Scope } from './Scope.mjs'
 
 export class AST {
 
     static dealExpr = (node, parent) => {
         const { children } = node
-        if (children[0].type === lexType.text) {
+        if (children[0].type === Word.type.text) {
             return new Text(node, parent)
         }
-        if (children[0].type === lexType.code) {
+        if (children[0].type === Word.type.code) {
             return new Code(node, parent)
         }
-        if (children[0].type === lexType.if) {
+        if (children[0].type === Word.type.if) {
             return new IfElse(node, parent)
         }
-        if (children[0].type === lexType.loop) {
+        if (children[0].type === Word.type.loop) {
             return new Loop(node, parent)
         }
     }
@@ -24,7 +24,7 @@ export class AST {
         const walk = array => array.flatMap(v => {
             if (v === undefined) {
                 return []
-            } else if (v.type === parseType.exprList) {
+            } else if (v.type === WordGroup.type.exprList) {
                 return walk(v.children)
             } else if (v.children) {
                 return {
@@ -40,15 +40,13 @@ export class AST {
         const pre = (tree) => Object.assign({}, tree, {
             children: walk(tree.children)
         })
-        console.log(lexer(str))
-
         return new Program(
-            pre(parser(lexer(str))),
+            pre(WordGroup.parser(Word.lexer(str))),
             new Scope(Object.keys(model))
         )
     }
 
-    scope
+    scope = null
     constructor(scope) {
         this.scope = scope
     }
@@ -83,7 +81,7 @@ class IfElse extends AST {
         this.body = body.map(v => AST.dealExpr(v, this.scope))
         this.code = head.data.code
 
-        if (tail.children[0].type === lexType.else) {
+        if (tail.children[0].type === Word.type.else) {
             this.else = new IfElse(tail, this.scope)
         }
     }
