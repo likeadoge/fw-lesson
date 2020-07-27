@@ -57,39 +57,39 @@ export class AST {
 }
 
 class Program extends AST {
-    children = []
+    #children = []
     constructor({ children }, parent) {
         super(parent.extends())
-        this.children = children.map(v => AST.dealExpr(v, this.scope))
+        this.#children = children.map(v => AST.dealExpr(v, this.scope))
     }
     toHtml(model) {
-        return this.children.map(v => v.toHtml(model)).join('')
+        return this.#children.map(v => v.toHtml(model)).join('')
     }
 }
 
 class IfElse extends AST {
-    else = null
-    body = []
-    func
-    code = ""
+    #else = null
+    #body = []
+    #func
+    #code = ""
     constructor({ children }, parent) {
         super(parent.extends())
         const [head, ...body] = children
         const tail = body.pop()
 
-        this.func = this.scope.genFunc(head.data.code || 'true')
-        this.body = body.map(v => AST.dealExpr(v, this.scope))
+        this.#func = this.scope.genFunc(head.data.code || 'true')
+        this.#body = body.map(v => AST.dealExpr(v, this.scope))
         this.code = head.data.code
 
         if (tail.children[0].type === Word.type.else) {
-            this.else = new IfElse(tail, this.scope)
+            this.#else = new IfElse(tail, this.scope)
         }
     }
     toHtml(model) {
-        if (this.func.call(model)) {
-            return this.body.map(v => v.toHtml(model)).join('')
-        } else if (this.else) {
-            return this.else.toHtml(model)
+        if (this.#func.call(model)) {
+            return this.#body.map(v => v.toHtml(model)).join('')
+        } else if (this.#else) {
+            return this.#else.toHtml(model)
         } else {
             return ''
         }
@@ -97,57 +97,57 @@ class IfElse extends AST {
 }
 
 class Loop extends AST {
-    body = []
-    func
-    code = ''
-    indexFiled = null
-    valueFiled = null
+    #body = []
+    #func
+    #code = ''
+    #indexFiled = null
+    #valueFiled = null
     constructor({ children }, parent) {
         const { code, input = [] } = children[0].data
         super(parent.extends(input.filter(v => !!v)))
 
-        this.func = this.scope.genFunc(code)
-        this.code = code
-        this.valueFiled = input[0] || null
-        this.indexFiled = input[1] || null
-        this.body = children.filter((v, i, arr) => i !== 0 && i !== arr.length - 1).map(v => AST.dealExpr(v, this.scope))
+        this.#func = this.scope.genFunc(code)
+        this.#code = code
+        this.#valueFiled = input[0] || null
+        this.#indexFiled = input[1] || null
+        this.#body = children.filter((v, i, arr) => i !== 0 && i !== arr.length - 1).map(v => AST.dealExpr(v, this.scope))
     }
 
     toHtml(model) {
-        const arr = this.func.call(model)
+        const arr = this.#func.call(model)
         if (!(arr instanceof Array)) throw new Error('loop error')
-        return arr.flatMap((value, index) => this.body.map(v => v.toHtml(Object.assign(
+        return arr.flatMap((value, index) => this.#body.map(v => v.toHtml(Object.assign(
             {},
             model,
-            this.indexFiled ? { [this.indexFiled]: index } : {},
-            this.valueFiled ? { [this.valueFiled]: value } : {},
+            this.#indexFiled ? { [this.#indexFiled]: index } : {},
+            this.#valueFiled ? { [this.#valueFiled]: value } : {},
         )))).join('')
     }
 
 }
 
 class Text extends AST {
-    content = ''
+    #content = ''
     constructor({ children }, parent) {
         super(parent.extends())
-        this.content = children[0].content
+        this.#content = children[0].content
     }
     toHtml() {
-        return this.content
+        return this.#content
     }
 
 }
 
 class Code extends AST {
-    func
-    code = ''
+    #func
+    #code = ''
     constructor({ children }, parent) {
         super(parent.extends())
-        this.code = children[0].data.code
-        this.func = this.scope.genFunc(children[0].data.code)
+        this.#code = children[0].data.code
+        this.#func = this.scope.genFunc(children[0].data.code)
     }
 
     toHtml(model) {
-        return String(this.func.call(model))
+        return String(this.#func.call(model))
     }
 }

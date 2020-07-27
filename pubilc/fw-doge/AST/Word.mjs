@@ -1,15 +1,3 @@
-
-export const lexType = {
-    loop: Symbol('loop'),
-    over: Symbol('over'),
-    if: Symbol('if'),
-    else: Symbol('else'),
-    end: Symbol('end'),
-    code: Symbol('{{}}'),
-    text: Symbol('text'),
-}
-
-
 export class Word {
     static type = {
         loop: Symbol('loop'),
@@ -44,26 +32,20 @@ export class Word {
             const code = str.match(/\{\{([\w|\W]+?)\}\}/)[1]
             return { code }
         }],
+        [Word.type.text, /([\d|\D]*)/],
     ]
-    
-    static lexer(str) {
-        const list = Word.keywords.reduce((r, [type, re, fn]) => {
-            return r.flatMap(str => {
-                if (typeof str !== 'string') {
-                    return [str]
-                } else {
-                    return str.split(re).map(content => re.test(content)
-                        ? new Word(type, content, fn ? (fn(content)) : null)
-                        : content)
-                }
-            })
-        }, [str]).map(content => {
-            return typeof content === 'string'
-                ? new Word(Word.type.text, content, null)
-                : content
+
+    static lexer = str => Word.keywords.reduce((r, [type, re, fn]) => {
+        return r.flatMap(str => {
+            if (typeof str !== 'string') {
+                return [str]
+            } else {
+                return str.split(re).filter(v => !!v).map(content => re.test(content)
+                    ? new Word(type, content, fn ? (fn(content)) : null)
+                    : content)
+            }
         })
-        return list
-    }
+    }, [str])
 
     type = null
     content = ''
@@ -74,49 +56,3 @@ export class Word {
         })
     }
 }
-
-// export const lexer = (str) => {
-
-//     const lexerKeyWord = [
-//         [lexType.loop, /(<\!--loop(?:<\w+(?:,\w+)?>)?\([\w|\W]+?\)-->)/, (str) => {
-//             const input = str.match(/<\!--loop(?:<(\w+(?:,\w+))?>)?\([\w|\W]+?\)-->/)[1]
-//             const code = str.match(/<\!--loop(?:<\w+(?:,\w+)?>)?\(([\w|\W]+?)\)-->/)[1]
-//             return {
-//                 input: input && input.trim() ? input.split(',').map(v => v.trim()) : [],
-//                 code
-//             }
-//         }],
-//         [lexType.if, /(<\!--if\([\w|\W]+?\)-->)/, (str) => {
-//             const code = str.match(/<\!--if\(([\w|\W]+?)\)-->/)[1]
-//             return { code }
-//         }],
-//         [lexType.else, /(<\!--else(?:\([\w|\W]+?\))?-->)/, (str) => {
-//             const code = str.match(/<\!--else(?:\(([\w|\W]+?)\))?-->/)[1] || 'true'
-//             return { code }
-//         }],
-//         [lexType.over, /(<\!--over-->)/],
-//         [lexType.end, /(<\!--end-->)/],
-//         [lexType.code, /(\{\{[\w|\W]+?\}\})/, (str) => {
-//             const code = str.match(/\{\{([\w|\W]+?)\}\}/)[1]
-//             return { code }
-//         }],
-//     ]
-
-//     const list = lexerKeyWord.reduce((r, [type, re, fn]) => {
-//         return r.flatMap(str => {
-//             if (typeof str !== 'string') return [str]
-//             else return str.split(re).map(v => re.test(v) ? {
-//                 type,
-//                 content: v,
-//                 data: fn ? (fn(v)) : null
-//             } : v)
-//         })
-//     }, [str]).map(v => {
-//         return typeof v === 'string' ? {
-//             type: lexType.text,
-//             content: v,
-//             data: null
-//         } : v
-//     })
-//     return list
-// }

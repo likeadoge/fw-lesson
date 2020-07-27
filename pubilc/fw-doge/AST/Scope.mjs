@@ -42,19 +42,19 @@ export class Scope {
 }
 
 export class Func {
-    scope
-    fn // Function
+    #scope
+    #fn // Function
     constructor(scope, code) {
-        this.scope = scope
-        this.fn = new Function(
+        this.#scope = scope
+        this.#fn = new Function(
             ...scope.vars,
             `return ${code || 'undefined'}`
         )
     }
     call(input) {
-        return this.fn.apply(
+        return this.#fn.apply(
             input,
-            this.scope.vars.map(key => input[key])
+            this.#scope.vars.map(key => input[key])
         )
     }
 
